@@ -1,12 +1,18 @@
 
+from collections import deque
+
 '''
-Find shortest path from top left column to the right lowest column using DFS.
+BFS time complexity : O(|E| + |V|)
+BFS space complexity : O(|E| + |V|)
+
+do BFS from (0,0) of the grid and get the minimum number of steps needed to get to the lower right column
+
 only step on the columns whose value is 1
+
 if there is no path, it returns -1
-(The first column(top left column) is not included in the answer.)
 
 Ex 1)
-If maze is
+If grid is
 [[1,0,1,1,1,1],
  [1,0,1,0,1,0],
  [1,0,1,0,1,1],
@@ -14,57 +20,67 @@ If maze is
 the answer is: 14
 
 Ex 2)
-If maze is
+If grid is
 [[1,0,0],
  [0,1,1],
  [0,1,1]], 
 the answer is: -1
 '''
 
+def maze_search(maze):
+    BLOCKED, ALLOWED = 0, 1
+    UNVISITED, VISITED = 0, 1
 
-def find_path(maze):
-    cnt = dfs(maze, 0, 0, 0, -1)
-    return cnt
+    initial_x, initial_y = 0, 0
 
-
-def dfs(maze, i, j, depth, cnt):
+    if maze[initial_x][initial_y] == BLOCKED:
+        return -1
+    
     directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
-    row = len(maze)
-    col = len(maze[0])
+    height, width = len(maze), len(maze[0])
 
-    if i == row - 1 and j == col - 1:
-        if cnt == -1:
-            cnt = depth
-        else:
-            if cnt > depth:
-                cnt = depth
-        return cnt
+    target_x, target_y = height - 1, width - 1
 
-    maze[i][j] = 0
+    queue = deque([(initial_x, initial_y, 0)])
 
-    for k in range(len(directions)):
-        nx_i = i + directions[k][0]
-        nx_j = j + directions[k][1]
+    is_visited = [[UNVISITED for w in range(width)] for h in range(height)]
+    is_visited[initial_x][initial_y] = VISITED
 
-        if nx_i >= 0 and nx_i < row and nx_j >= 0 and nx_j < col:
-            if maze[nx_i][nx_j] == 1:
-                cnt = dfs(maze, nx_i, nx_j, depth + 1, cnt)
+    while queue:
+        x, y, steps = queue.popleft()
 
-    maze[i][j] = 1
+        if x == target_x and y == target_y:
+            return steps
 
-    return cnt
+        for dx, dy in directions:
+            new_x = x + dx
+            new_y = y + dy
+
+            if not (0 <= new_x < height and 0 <= new_y < width):
+                continue
+
+            if maze[new_x][new_y] == ALLOWED and is_visited[new_x][new_y] == UNVISITED:
+                queue.append((new_x, new_y, steps + 1))
+                is_visited[new_x][new_y] = VISITED
+
+    return -1 
 
 import unittest
 
 
 class MazeSearchGeminiTest(unittest.TestCase):
-    def test_gemini_find_path_example_1(self):
+    def test_gemini_maze_search_example1(self):
         maze = [[1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 1, 0],
                 [1, 0, 1, 0, 1, 1], [1, 1, 1, 0, 1, 1]]
-        self.assertEqual(find_path(maze), 14)
+        self.assertEqual(maze_search(maze), 14)
 
-    def test_gemini_find_path_example_2(self):
+    def test_gemini_maze_search_example2(self):
         maze = [[1, 0, 0], [0, 1, 1], [0, 1, 1]]
-        self.assertEqual(find_path(maze), -1)
+        self.assertEqual(maze_search(maze), -1)
+
+    def test_gemini_maze_search_blocked_start(self):
+        maze = [[0, 0, 1, 1, 1, 1], [1, 0, 1, 0, 1, 0],
+                [1, 0, 1, 0, 1, 1], [1, 1, 1, 0, 1, 1]]
+        self.assertEqual(maze_search(maze), -1)
 
