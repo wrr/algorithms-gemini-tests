@@ -4,33 +4,17 @@ from algorithms.sort.insertion_sort import insertion_sort
 
 
 class InsertionSortGeminiTest(unittest.TestCase):
-
     def test_gemini_insertion_sort_empty_list(self):
-        array = []
-        sorted_array = insertion_sort(array)
-        self.assertEqual([], sorted_array)
+        self.assertEqual([], insertion_sort([]))
 
-    def test_gemini_insertion_sort_one_element(self):
-        array = [1]
-        sorted_array = insertion_sort(array)
-        self.assertEqual([1], sorted_array)
+    def test_gemini_insertion_sort_single_element(self):
+        self.assertEqual([1], insertion_sort([1]))
 
-    def test_gemini_insertion_sort_two_elements(self):
-        array = [2, 1]
-        sorted_array = insertion_sort(array)
-        self.assertEqual([1, 2], sorted_array)
+    def test_gemini_insertion_sort_already_sorted(self):
+        self.assertEqual([1, 2, 3, 4, 5], insertion_sort([1, 2, 3, 4, 5]))
 
-    def test_gemini_insertion_sort_odd_number_of_elements(self):
-        array = [1, 5, 3, 2, 4]
-        sorted_array = insertion_sort(array)
-        self.assertEqual([1, 2, 3, 4, 5], sorted_array)
+    def test_gemini_insertion_sort_reverse_sorted(self):
+        self.assertEqual([1, 2, 3, 4, 5], insertion_sort([5, 4, 3, 2, 1]))
 
-    def test_gemini_insertion_sort_even_number_of_elements(self):
-        array = [1, 6, 3, 2, 5, 4]
-        sorted_array = insertion_sort(array)
-        self.assertEqual([1, 2, 3, 4, 5, 6], sorted_array)
-
-    def test_gemini_insertion_sort_duplicate_elements(self):
-        array = [1, 3, 3, 2, 4, 4, 2]
-        sorted_array = insertion_sort(array)
-        self.assertEqual([1, 2, 2, 3, 3, 4, 4], sorted_array)
+    def test_gemini_insertion_sort_general_case(self):
+        self.assertEqual([1, 2, 3, 4, 5], insertion_sort([4, 2, 5, 1, 3]))
