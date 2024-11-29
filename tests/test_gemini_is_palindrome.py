@@ -1,170 +1,156 @@
 
-def is_palindrome(head):
-    if not head:
-        return True
-    # split the list to two parts
-    fast, slow = head.next, head
-    while fast and fast.next:
-        fast = fast.next.next
-        slow = slow.next
-    second = slow.next
-    slow.next = None  # Don't forget here! But forget still works!
-    # reverse the second part
-    node = None
-    while second:
-        nxt = second.next
-        second.next = node
-        node = second
-        second = nxt
-    # compare two parts
-    # second part has the same or one less node
-    while node:
-        if node.val != head.val:
-            return False
-        node = node.next
-        head = head.next
-    return True
+"""
+Given a string, determine if it is a palindrome,
+considering only alphanumeric characters and ignoring cases.
+For example,
+"A man, a plan, a canal: Panama" is a palindrome.
+"race a car" is not a palindrome.
+Note:
+Have you consider that the string might be empty?
+This is a good question to ask during an interview.
+For the purpose of this problem,
+we define empty string as valid palindrome.
+"""
+from string import ascii_letters
+from collections import deque
 
 
-def is_palindrome_stack(head):
-    if not head or not head.next:
-        return True
-
-    # 1. Get the midpoint (slow)
-    slow = fast = cur = head
-    while fast and fast.next:
-        fast, slow = fast.next.next, slow.next
-
-    # 2. Push the second half into the stack
-    stack = [slow.val]
-    while slow.next:
-        slow = slow.next
-        stack.append(slow.val)
-
-    # 3. Comparison
-    while stack:
-        if stack.pop() != cur.val:
-            return False
-        cur = cur.next
-
-    return True
-
-
-def is_palindrome_dict(head):
+def is_palindrome(s):
     """
-    This function builds up a dictionary where the keys are the values of the list,
-    and the values are the positions at which these values occur in the list.
-    We then iterate over the dict and if there is more than one key with an odd
-    number of occurrences, bail out and return False.
-    Otherwise, we want to ensure that the positions of occurrence sum to the
-    value of the length of the list - 1, working from the outside of the list inward.
-    For example:
-    Input: 1 -> 1 -> 2 -> 3 -> 2 -> 1 -> 1
-    d = {1: [0,1,5,6], 2: [2,4], 3: [3]}
-    '3' is the middle outlier, 2+4=6, 0+6=6 and 5+1=6 so we have a palindrome.
+    :type s: str
+    :rtype: bool
     """
-    if not head or not head.next:
-        return True
-    d = {}
-    pos = 0
-    while head:
-        if head.val in d.keys():
-            d[head.val].append(pos)
-        else:
-            d[head.val] = [pos]
-        head = head.next
-        pos += 1
-    checksum = pos - 1
-    middle = 0
-    for v in d.values():
-        if len(v) % 2 != 0:
-            middle += 1
-        else:
-            step = 0
-            for i in range(0, len(v)):
-                if v[i] + v[len(v) - 1 - step] != checksum:
-                    return False
-                step += 1
-        if middle > 1:
+    i = 0
+    j = len(s)-1
+    while i < j:
+        while i < j and not s[i].isalnum():
+            i += 1
+        while i < j and not s[j].isalnum():
+            j -= 1
+        if s[i].lower() != s[j].lower():
+            return False
+        i, j = i+1, j-1
+    return True
+
+"""
+Here is a bunch of other variations of is_palindrome function.
+
+Variation 1:
+Find the reverse of the string and compare it with the original string
+
+Variation 2:
+Loop from the start to length/2 and check the first character and last character
+and so on... for instance s[0] compared with s[n-1], s[1] == s[n-2]...
+
+Variation 3:
+Using stack idea. 
+
+Note: We are assuming that we are just checking a one word string. To check if a complete sentence 
+"""  
+def remove_punctuation(s):
+    """
+    Remove punctuation, case sensitivity and spaces
+    """
+    return "".join(i.lower() for i in s if i in ascii_letters)
+
+# Variation 1
+def string_reverse(s):
+	return s[::-1]
+
+def is_palindrome_reverse(s):
+	s = remove_punctuation(s)
+	
+	# can also get rid of the string_reverse function and just do this return s == s[::-1] in one line.
+	if (s == string_reverse(s)): 
+		return True
+	return False	
+
+
+# Variation 2
+def is_palindrome_two_pointer(s):
+    s = remove_punctuation(s)
+	
+    for i in range(0, len(s)//2):
+        if (s[i] != s[len(s) - i - 1]):
             return False
     return True
+	
+
+# Variation 3
+def is_palindrome_stack(s):
+    stack = []
+    s = remove_punctuation(s)
+	
+    for i in range(len(s)//2, len(s)):
+        stack.append(s[i])
+    for i in range(0, len(s)//2):
+        if s[i] != stack.pop():
+            return False
+    return True	
+
+# Variation 4 (using deque)
+def is_palindrome_deque(s):
+    s = remove_punctuation(s)
+    deq = deque()
+    for char in s:
+        deq.appendleft(char)
+
+    equal = True
+
+    while len(deq) > 1 and equal:
+        first = deq.pop()
+        last = deq.popleft()
+        if first != last :
+            equal = False
+
+    return equal
 
 import unittest
 
 
-class Node:
-    def __init__(self, x):
-        self.val = x
-        self.next = None
-
-
 class IsPalindromeGeminiTest(unittest.TestCase):
-    def test_gemini_is_palindrome_empty_list(self):
-        self.assertTrue(is_palindrome(None))
+    def test_gemini_is_palindrome_empty_string(self):
+        self.assertTrue(is_palindrome(""))
 
-    def test_gemini_is_palindrome_single_node(self):
-        head = Node('a')
-        self.assertTrue(is_palindrome(head))
+    def test_gemini_is_palindrome_valid_palindrome(self):
+        self.assertTrue(is_palindrome("A man, a plan, a canal: Panama"))
 
-    def test_gemini_is_palindrome_palindrome_list(self):
-        head = Node('a')
-        head.next = Node('b')
-        head.next.next = Node('c')
-        head.next.next.next = Node('b')
-        head.next.next.next.next = Node('a')
-        self.assertTrue(is_palindrome(head))
+    def test_gemini_is_palindrome_invalid_palindrome(self):
+        self.assertFalse(is_palindrome("race a car"))
 
-    def test_gemini_is_palindrome_non_palindrome_list(self):
-        head = Node('a')
-        head.next = Node('b')
-        head.next.next = Node('c')
-        head.next.next.next = Node('d')
-        head.next.next.next.next = Node('e')
-        self.assertFalse(is_palindrome(head))
+    def test_gemini_is_palindrome_reverse_empty_string(self):
+        self.assertTrue(is_palindrome_reverse(""))
 
-    def test_gemini_is_palindrome_stack_empty_list(self):
-        self.assertTrue(is_palindrome_stack(None))
+    def test_gemini_is_palindrome_reverse_valid_palindrome(self):
+        self.assertTrue(is_palindrome_reverse("madam"))
 
-    def test_gemini_is_palindrome_stack_single_node(self):
-        head = Node('a')
-        self.assertTrue(is_palindrome_stack(head))
+    def test_gemini_is_palindrome_reverse_invalid_palindrome(self):
+        self.assertFalse(is_palindrome_reverse("house"))
 
-    def test_gemini_is_palindrome_stack_palindrome_list(self):
-        head = Node('a')
-        head.next = Node('b')
-        head.next.next = Node('c')
-        head.next.next.next = Node('b')
-        head.next.next.next.next = Node('a')
-        self.assertTrue(is_palindrome_stack(head))
+    def test_gemini_is_palindrome_two_pointer_empty_string(self):
+        self.assertTrue(is_palindrome_two_pointer(""))
 
-    def test_gemini_is_palindrome_stack_non_palindrome_list(self):
-        head = Node('a')
-        head.next = Node('b')
-        head.next.next = Node('c')
-        head.next.next.next = Node('d')
-        head.next.next.next.next = Node('e')
-        self.assertFalse(is_palindrome_stack(head))
+    def test_gemini_is_palindrome_two_pointer_valid_palindrome(self):
+        self.assertTrue(is_palindrome_two_pointer("madam"))
 
-    def test_gemini_is_palindrome_dict_empty_list(self):
-        self.assertTrue(is_palindrome_dict(None))
+    def test_gemini_is_palindrome_two_pointer_invalid_palindrome(self):
+        self.assertFalse(is_palindrome_two_pointer("house"))
 
-    def test_gemini_is_palindrome_dict_single_node(self):
-        head = Node('a')
-        self.assertTrue(is_palindrome_dict(head))
+    def test_gemini_is_palindrome_stack_empty_string(self):
+        self.assertTrue(is_palindrome_stack(""))
 
-    def test_gemini_is_palindrome_dict_palindrome_list(self):
-        head = Node('a')
-        head.next = Node('b')
-        head.next.next = Node('c')
-        head.next.next.next = Node('b')
-        head.next.next.next.next = Node('a')
-        self.assertTrue(is_palindrome_dict(head))
+    def test_gemini_is_palindrome_stack_valid_palindrome(self):
+        self.assertTrue(is_palindrome_stack("madam"))
 
-    def test_gemini_is_palindrome_dict_non_palindrome_list(self):
-        head = Node('a')
-        head.next = Node('b')
-        head.next.next = Node('c')
-        head.next.next.next = Node('d')
-        head.next.next.next.next = Node('e')
-        self.assertFalse(is_palindrome_dict(head))
+    def test_gemini_is_palindrome_stack_invalid_palindrome(self):
+        self.assertFalse(is_palindrome_stack("house"))
+
+    def test_gemini_is_palindrome_deque_empty_string(self):
+        self.assertTrue(is_palindrome_deque(""))
+
+    def test_gemini_is_palindrome_deque_valid_palindrome(self):
+        self.assertTrue(is_palindrome_deque("madam"))
+
+    def test_gemini_is_palindrome_deque_invalid_palindrome(self):
+        self.assertFalse(is_palindrome_deque("house"))
 
