@@ -1,47 +1,47 @@
 
 """
-Given a linked list, is_sort function returns true if the list is in sorted
-(increasing) order and return false otherwise. An empty list is considered
-to be sorted.
+Given a stack, a function is_sorted accepts a stack as a parameter and returns
+true if the elements in the stack occur in ascending increasing order from
+bottom, and false otherwise. That is, the smallest element should be at bottom
 
 For example:
-Null :List is sorted
-1 2 3 4 :List is sorted
-1 2 -1 3 :List is not sorted
+bottom [6, 3, 5, 1, 2, 4] top
+The function should return false
+bottom [1, 2, 3, 4, 5, 6] top
+The function should return true
 """
-class Node:
-    def __init__(self, x):
-        self.val = x
-        self.next = None
 
-def is_sorted(head):
-    if not head:
-        return True
-    current = head
-    while current.next:
-        if current.val > current.next.val:
+
+def is_sorted(stack):
+    storage_stack = []
+    for i in range(len(stack)):
+        if len(stack) == 0:
+            break
+        first_val = stack.pop()
+        if len(stack) == 0:
+            break
+        second_val = stack.pop()
+        if first_val < second_val:
             return False
-        current = current.next
+        storage_stack.append(first_val)
+        stack.append(second_val)
+
+    # Backup stack
+    for i in range(len(storage_stack)):
+        stack.append(storage_stack.pop())
+
     return True
 
 import unittest
 
 
 class IsSortedGeminiTest(unittest.TestCase):
-    def test_gemini_is_sorted_empty_list(self):
-        self.assertTrue(is_sorted(None))
+    def test_gemini_is_sorted_empty_stack(self):
+        self.assertTrue(is_sorted([]))
 
-    def test_gemini_is_sorted_sorted_list(self):
-        head = Node(1)
-        head.next = Node(2)
-        head.next.next = Node(3)
-        head.next.next.next = Node(4)
-        self.assertTrue(is_sorted(head))
+    def test_gemini_is_sorted_sorted_stack(self):
+        self.assertTrue(is_sorted([1, 2, 3, 4, 5, 6]))
 
-    def test_gemini_is_sorted_unsorted_list(self):
-        head = Node(1)
-        head.next = Node(2)
-        head.next.next = Node(-1)
-        head.next.next.next = Node(3)
-        self.assertFalse(is_sorted(head))
+    def test_gemini_is_sorted_unsorted_stack(self):
+        self.assertFalse(is_sorted([6, 3, 5, 1, 2, 4]))
 
